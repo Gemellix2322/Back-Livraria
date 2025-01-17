@@ -50,8 +50,15 @@ app.get('/books', (req, res) => {
   });
 });
 
-app.get('/users', (req, res) => {
+app.get('/get-users', (req, res) => {
   db.query('SELECT * FROM users', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.json(results);
+  });
+});
+
+app.get('/messages', (req, res) => {
+  db.query('SELECT * FROM messages', (err, results) => {
     if (err) return res.status(500).send(err);
     res.json(results);
   });
@@ -61,3 +68,47 @@ app.get('/users', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
+app.post("/post-users", (req, res) => {
+  const { username, password } = req.body;  // Mudando para username
+
+  const sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+  db.query(sql, [username, password], (err, result) => {
+    if (err) {
+      console.error("Erro ao inserir no banco:", err);
+      res.status(500).send("Erro no servidor");
+    } else {
+      res.status(200).json({ message: "Usuário cadastrado com sucesso!" });
+    }
+  });
+});
+
+app.post("/new-messages", (req, res) => {
+  const {message, user, book} = req.body;
+
+  const sql = "INSERT INTO messages (message, user, book) VALUES (?, ?, ?)";
+
+  db.query(sql, [message, user, book], (err, result) => {
+    if(err) {
+      console.error("Erro ao inserir no banco:", err);
+      res.status(500).send("Erro no servidor");
+    } else {
+      res.status(200).json({ message: "Mensagem cadastrada com sucesso!"});
+    }
+  });
+});
+
+app.put("/update-users", (req, res) => {
+  const {name, password, id} = req.body;
+
+  const sql = "UPDATE users SET name = ?, password = ? WHERE id = ?";
+
+  db.query(sql, [name, password, id], (err, result) => {
+    if(err) {
+      console.error("Erro ao inserir no banco:", err);
+      res.status(500).send("Erro no servidor");
+    } else {
+      res.status(200).json({ message: "Usuário alterado com succesoo!"});
+    }
+  })
+})
